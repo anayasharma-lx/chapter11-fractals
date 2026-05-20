@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Fractal Builder — Ganita Prakash Grade 8</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4f0;--surface:#ffffff;--surface2:#f0ede8;
+  --border:#d8d4cc;--text:#1a1814;--text2:#5a5650;--text3:#9a958e;
+  --accent:#c0392b;--blue:#2c7be5;--green:#1a7a4a;
+  --font:'DM Sans',-apple-system,sans-serif;
+  --mono:'DM Mono',ui-monospace,monospace;
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased;line-height:1.5}
+.page{max-width:860px;margin:0 auto;padding:32px 24px}
+.label{font-size:11px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--text3);margin-bottom:6px}
+.title{font-size:22px;font-weight:700;margin-bottom:6px}
+.subtitle{font-size:14px;color:var(--text2);margin-bottom:24px;max-width:600px;line-height:1.55}
+.card{background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:24px;margin-bottom:20px}
+
+.tabs{display:flex;gap:4px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:4px;margin-bottom:20px}
+.tab{flex:1;padding:9px 0;text-align:center;font-size:13px;font-weight:500;color:var(--text2);border-radius:7px;cursor:pointer;border:none;background:none;transition:all .15s;font-family:var(--font)}
+.tab.active{background:var(--surface);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.08);border:1.5px solid var(--border)}
+
+.step-controls{display:flex;align-items:center;gap:14px;margin-bottom:20px;flex-wrap:wrap}
+.step-controls label{font-size:13px;font-weight:500;color:var(--text2)}
+.btn{padding:8px 18px;border:1.5px solid var(--border);border-radius:8px;font-size:13px;font-weight:500;color:var(--text);background:var(--surface);cursor:pointer;font-family:var(--font);transition:all .12s}
+.btn:hover{border-color:var(--text)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#a93226}
+.step-badge{background:var(--surface2);border:1.5px solid var(--border);border-radius:8px;padding:7px 14px;font-family:var(--mono);font-size:16px;font-weight:600;min-width:56px;text-align:center}
+
+canvas{display:block;border-radius:8px;background:#fafaf8;border:1.5px solid var(--border)}
+.canvas-wrap{width:100%;display:flex;justify-content:center;margin-bottom:20px}
+
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px;margin-bottom:16px}
+.stat{background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:13px 16px}
+.stat-label{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);margin-bottom:3px}
+.stat-val{font-family:var(--mono);font-size:20px;font-weight:600;color:var(--text)}
+.stat-val.red{color:var(--accent)}
+.stat-val.blue{color:var(--blue)}
+.stat-val.green{color:var(--green)}
+
+.insight{background:#fff8f0;border:1.5px solid #f0d8c0;border-radius:10px;padding:14px 18px;font-size:13.5px;color:#6b4400;line-height:1.6}
+.insight strong{color:#a05000}
+.insight .eq{font-family:var(--mono);display:block;margin:4px 0;font-size:13px}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="label">Chapter 4 · Exploring Some Geometric Themes</div>
+  <div class="title">Fractal Builder</div>
+  <div class="subtitle">Step through the construction of three mathematical fractals. Watch how removing and replacing small pieces at each step creates a self-similar pattern that repeats at every scale.</div>
+
+  <div class="tabs">
+    <button class="tab active" id="t0">Sierpinski Carpet</button>
+    <button class="tab" id="t1">Sierpinski Gasket</button>
+    <button class="tab" id="t2">Koch Snowflake</button>
+  </div>
+
+  <div class="card">
+    <div class="step-controls">
+      <label>Step:</label>
+      <button class="btn" id="btnPrev">Previous</button>
+      <div class="step-badge" id="stepBadge">0</div>
+      <button class="btn primary" id="btnNext">Next step</button>
+      <button class="btn" id="btnReset">Reset</button>
+    </div>
+    <div class="canvas-wrap">
+      <canvas id="cvs" width="480" height="480"></canvas>
+    </div>
+    <div class="stats-grid" id="statsGrid"></div>
+    <div class="insight" id="insight"></div>
+  </div>
+</div>
+
+<script>
+const cvs = document.getElementById('cvs');
+const ctx = cvs.getContext('2d');
+let mode = 0; // 0=carpet, 1=gasket, 2=koch
+let step = 0;
+const MAX_STEPS = [4, 5, 5];
+
+// ── Sierpinski Carpet ──────────────────────────────────────────────────
+function drawCarpet(step) {
+  const S = 480;
+  ctx.clearRect(0, 0, S, S);
+  ctx.fillStyle = '#fafaf8';
+  ctx.fillRect(0, 0, S, S);
+  ctx.fillStyle = '#2c5f9e';
+  ctx.fillRect(0, 0, S, S);
+  carveHoles(0, 0, S, step);
+}
+
+function carveHoles(x, y, size, depth) {
+  if (depth === 0) return;
+  const s = size / 3;
+  // Remove centre
+  ctx.fillStyle = '#fafaf8';
+  ctx.fillRect(x + s, y + s, s, s);
+  for (let row = 0; row < 3; row++) {
+    for (let col = 0; col < 3; col++) {
+      if (row === 1 && col === 1) continue;
+      carveHoles(x + col * s, y + row * s, s, depth - 1);
+    }
+  }
+}
+
+// ── Sierpinski Gasket ──────────────────────────────────────────────────
+function drawGasket(step) {
+  const S = 480;
+  ctx.clearRect(0, 0, S, S);
+  ctx.fillStyle = '#fafaf8';
+  ctx.fillRect(0, 0, S, S);
+  const pad = 20;
+  const h = (S - 2 * pad) * (Math.sqrt(3) / 2);
+  const cx = S / 2, by = S - pad, ty = by - h;
+  const ax = cx - (S - 2 * pad) / 2, bx = cx + (S - 2 * pad) / 2;
+  // Draw filled triangle first
+  ctx.beginPath();
+  ctx.moveTo(cx, ty); ctx.lineTo(ax, by); ctx.lineTo(bx, by); ctx.closePath();
+  ctx.fillStyle = '#1a7a4a';
+  ctx.fill();
+  carveGasket(cx, ty, ax, by, bx, by, step);
+}
+
+function carveGasket(tx, ty, lx, ly, rx, ry, depth) {
+  if (depth === 0) return;
+  const mx = (lx + rx) / 2, my = (ly + ry) / 2;
+  const ml = (tx + lx) / 2, mly = (ty + ly) / 2;
+  const mr = (tx + rx) / 2, mry = (ty + ry) / 2;
+  ctx.beginPath();
+  ctx.moveTo(mx, my); ctx.lineTo(ml, mly); ctx.lineTo(mr, mry); ctx.closePath();
+  ctx.fillStyle = '#fafaf8';
+  ctx.fill();
+  carveGasket(tx, ty, ml, mly, mr, mry, depth - 1);
+  carveGasket(ml, mly, lx, ly, mx, my, depth - 1);
+  carveGasket(mr, mry, mx, my, rx, ry, depth - 1);
+}
+
+// ── Koch Snowflake ──────────────────────────────────────────────────────
+function kochPoints(p1, p2, depth) {
+  if (depth === 0) return [p1, p2];
+  const dx = p2.x - p1.x, dy = p2.y - p1.y;
+  const a = { x: p1.x + dx / 3, y: p1.y + dy / 3 };
+  const b = { x: p1.x + 2 * dx / 3, y: p1.y + 2 * dy / 3 };
+  const peak = {
+    x: a.x + (b.x - a.x) * Math.cos(-Math.PI / 3) - (b.y - a.y) * Math.sin(-Math.PI / 3),
+    y: a.y + (b.x - a.x) * Math.sin(-Math.PI / 3) + (b.y - a.y) * Math.cos(-Math.PI / 3)
+  };
+  const pts = [];
+  const seg1 = kochPoints(p1, a, depth - 1);
+  const seg2 = kochPoints(a, peak, depth - 1);
+  const seg3 = kochPoints(peak, b, depth - 1);
+  const seg4 = kochPoints(b, p2, depth - 1);
+  return [...seg1.slice(0, -1), ...seg2.slice(0, -1), ...seg3.slice(0, -1), ...seg4];
+}
+
+function drawKoch(step) {
+  const S = 480;
+  ctx.clearRect(0, 0, S, S);
+  ctx.fillStyle = '#fafaf8';
+  ctx.fillRect(0, 0, S, S);
+  const pad = 40, r = (S - 2 * pad) / Math.sqrt(3);
+  const cx = S / 2, cy = S / 2 + r * 0.1;
+  const pts0 = [
+    { x: cx, y: cy - r },
+    { x: cx + r * Math.sin(2 * Math.PI / 3), y: cy - r * Math.cos(2 * Math.PI / 3) },
+    { x: cx + r * Math.sin(4 * Math.PI / 3), y: cy - r * Math.cos(4 * Math.PI / 3) }
+  ];
+  const sides = [
+    kochPoints(pts0[0], pts0[1], step),
+    kochPoints(pts0[1], pts0[2], step),
+    kochPoints(pts0[2], pts0[0], step)
+  ];
+  const allPts = [...sides[0].slice(0, -1), ...sides[1].slice(0, -1), ...sides[2].slice(0, -1)];
+  ctx.beginPath();
+  allPts.forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y));
+  ctx.closePath();
+  ctx.fillStyle = '#e08020';
+  ctx.fill();
+  ctx.strokeStyle = '#a05000';
+  ctx.lineWidth = step < 3 ? 1.5 : 0.7;
+  ctx.stroke();
+}
+
+function computeStats(mode, step) {
+  if (mode === 0) {
+    // Carpet: R_n = 8^n, H_n = sum 8^0..8^(n-1)
+    const Rn = Math.pow(8, step);
+    const Hn = step === 0 ? 0 : (Math.pow(8, step) - 1) / 7;
+    const area = Math.pow(8 / 9, step);
+    return { Rn, Hn: Math.round(Hn), area };
+  } else if (mode === 1) {
+    // Gasket: T_n = 3^n, holes = (3^n - 1)/2
+    const Tn = Math.pow(3, step);
+    const Hn = step === 0 ? 0 : (Math.pow(3, step) - 1) / 2;
+    const area = Math.pow(3 / 4, step);
+    return { Tn, Hn: Math.round(Hn), area };
+  } else {
+    // Koch: sides = 3*4^n, perimeter = 3*(4/3)^n
+    const sides = 3 * Math.pow(4, step);
+    const perim = 3 * Math.pow(4 / 3, step);
+    const area = (2 * Math.sqrt(3) / 5) * (1 - Math.pow(4 / 9, step) * (3 / 4));
+    return { sides, perim };
+  }
+}
+
+function renderStats(mode, step) {
+  const sg = document.getElementById('statsGrid');
+  const ins = document.getElementById('insight');
+  const s = computeStats(mode, step);
+  sg.innerHTML = '';
+
+  function addStat(label, val, cls) {
+    const div = document.createElement('div');
+    div.className = 'stat';
+    div.innerHTML = `<div class="stat-label">${label}</div><div class="stat-val ${cls}">${val}</div>`;
+    sg.appendChild(div);
+  }
+
+  addStat('Step', step, '');
+  if (mode === 0) {
+    addStat('Remaining squares (R<sub>n</sub>)', s.Rn.toLocaleString(), 'blue');
+    addStat('Holes (H<sub>n</sub>)', s.Hn.toLocaleString(), 'red');
+    addStat('Area remaining', (s.area * 100).toFixed(2) + '%', 'green');
+    ins.innerHTML = `<strong>Pattern:</strong>
+      <span class="eq">R<sub>n</sub> = 8<sup>n</sup> = 8<sup>${step}</sup> = ${s.Rn.toLocaleString()}</span>
+      <span class="eq">H<sub>n</sub> = 1 + 8 + 8² + ... + 8<sup>n−1</sup> = (8<sup>n</sup>−1)/7 = ${s.Hn.toLocaleString()}</span>
+      Each remaining square at step n produces <strong>8 new squares</strong> and <strong>1 new hole</strong> at step n+1. The area shrinks by a factor of 8/9 each step — it approaches zero as n grows.`;
+  } else if (mode === 1) {
+    addStat('Remaining triangles', s.Tn.toLocaleString(), 'blue');
+    addStat('Holes (H<sub>n</sub>)', s.Hn.toLocaleString(), 'red');
+    addStat('Area remaining', (s.area * 100).toFixed(2) + '%', 'green');
+    ins.innerHTML = `<strong>Pattern:</strong>
+      <span class="eq">Remaining triangles T<sub>n</sub> = 3<sup>n</sup> = 3<sup>${step}</sup> = ${s.Tn.toLocaleString()}</span>
+      <span class="eq">Holes H<sub>n</sub> = (3<sup>n</sup>−1)/2 = ${s.Hn.toLocaleString()}</span>
+      Each triangle at step n produces <strong>3 smaller triangles</strong> and removes the central one. The area remaining is (3/4)<sup>n</sup> — it also approaches zero.`;
+  } else {
+    addStat('Number of sides', s.sides.toLocaleString(), 'blue');
+    addStat('Perimeter (×side)', s.perim.toFixed(4) + ' units', 'red');
+    ins.innerHTML = `<strong>Pattern:</strong>
+      <span class="eq">Number of sides = 3 × 4<sup>n</sup> = 3 × 4<sup>${step}</sup> = ${s.sides.toLocaleString()}</span>
+      <span class="eq">Perimeter = 3 × (4/3)<sup>n</sup> = ${s.perim.toFixed(4)} (if starting side = 1)</span>
+      Each side is replaced by 4 shorter sides at each step. The number of sides grows without bound — and so does the perimeter, even though the shape stays within a bounded region. This is one of the remarkable properties of the Koch Snowflake.`;
+  }
+}
+
+function draw() {
+  if (mode === 0) drawCarpet(step);
+  else if (mode === 1) drawGasket(step);
+  else drawKoch(step);
+  document.getElementById('stepBadge').textContent = step;
+  renderStats(mode, step);
+  document.getElementById('btnPrev').disabled = step === 0;
+  document.getElementById('btnNext').disabled = step >= MAX_STEPS[mode];
+}
+
+document.getElementById('btnNext').onclick = () => { if (step < MAX_STEPS[mode]) { step++; draw(); } };
+document.getElementById('btnPrev').onclick = () => { if (step > 0) { step--; draw(); } };
+document.getElementById('btnReset').onclick = () => { step = 0; draw(); };
+
+[0, 1, 2].forEach(i => {
+  document.getElementById('t' + i).onclick = () => {
+    mode = i; step = 0;
+    document.querySelectorAll('.tab').forEach((t, j) => t.classList.toggle('active', j === i));
+    draw();
+  };
+});
+
+// Responsive canvas
+function resize() {
+  const w = Math.min(480, document.querySelector('.card').clientWidth - 48);
+  cvs.width = w; cvs.height = w;
+  draw();
+}
+window.addEventListener('resize', resize);
+resize();
+</script>
+</body>
+</html>
