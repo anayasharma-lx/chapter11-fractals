@@ -3,125 +3,176 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Fractal Builder — Ch. 11</title>
+<title>Fractal Builder — Grade 8</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:wght@400;500;600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,600;9..40,800;9..40,900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#f4f2ec;--paper:#fff;--sand:#e8e4db;--ink:#1a1714;--rule:#ccc8be;
-  --blue:#1650a8;--green:#1a6e42;--amber:#c47a0a;--red:#b83020;
-  --display:'Bebas Neue',Impact,sans-serif;
-  --mono:'DM Mono',monospace;--body:'DM Sans',sans-serif;
+  --bg1:#fddcb5;--bg2:#dff2e0;
+  --card:#fff;--border:#1a1a2e;
+  --ink:#1a1a2e;--ink2:#4a4a5a;--ink3:#9090a0;
+  --teal:#4ecdc4;--orange:#ff6b35;--yellow:#ffd93d;--red:#e63946;--purple:#a78bfa;--green:#2a9d8f;
+  --sans:'DM Sans',system-ui,sans-serif;--mono:'DM Mono',monospace;
 }
-html{background:var(--bg)}
-body{font-family:var(--body);background:var(--bg);color:var(--ink);min-height:100vh;
-  -webkit-font-smoothing:antialiased;padding:0}
+html{background:linear-gradient(135deg,var(--bg1) 0%,#fef6e8 50%,var(--bg2) 100%);min-height:100vh}
+body{font-family:var(--sans);color:var(--ink);min-height:100vh;padding:32px 24px;display:flex;flex-direction:column;align-items:center}
 
-/* MASTHEAD */
-.masthead{border-bottom:3px solid var(--ink);padding:16px 24px 12px;
-  display:grid;grid-template-columns:auto 1fr auto;gap:14px;align-items:baseline}
-.m-tag{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.14em;
-  text-transform:uppercase;opacity:.4;white-space:nowrap}
-.m-title{font-family:var(--display);font-size:clamp(26px,6.5vw,54px);line-height:.92;
-  text-align:center;letter-spacing:.02em}
-.m-right{font-family:var(--mono);font-size:10px;opacity:.4;text-align:right;white-space:nowrap}
-@media(max-width:480px){.masthead{grid-template-columns:1fr}.m-tag,.m-right{display:none}}
+/* PAGE CARD */
+.page-card{background:var(--card);border:2px solid var(--border);border-radius:24px;width:100%;max-width:960px;overflow:hidden}
 
-/* FRACTAL TABS — horizontal scroll */
-.fractal-bar{display:flex;overflow-x:auto;-webkit-overflow-scrolling:touch;
-  border-bottom:2px solid var(--ink);scrollbar-width:none;background:var(--paper)}
-.fractal-bar::-webkit-scrollbar{display:none}
-.fractal-btn{padding:12px 22px;border:none;border-bottom:3px solid transparent;
-  background:transparent;font-family:var(--display);font-size:18px;letter-spacing:.04em;
-  color:var(--ink);opacity:.35;cursor:pointer;white-space:nowrap;flex-shrink:0;
-  margin-bottom:-2px;transition:all .15s;-webkit-tap-highlight-color:transparent}
-.fractal-btn.active{opacity:1;border-bottom-color:var(--ink)}
+/* HEADER */
+.card-header{padding:28px 36px 22px}
+.activity-pill{display:inline-flex;align-items:center;gap:6px;background:var(--yellow);border:2px solid var(--border);border-radius:30px;padding:4px 14px;font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;margin-bottom:14px}
+.activity-pill::before{content:'★';font-size:10px}
+.page-title{font-size:clamp(24px,4vw,40px);font-weight:900;line-height:1.05;display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.t-pill{color:#fff;border:2px solid var(--border);border-radius:12px;padding:3px 16px;font-style:italic;font-size:inherit;display:inline-block}
+.page-desc{font-size:15px;color:var(--ink2);line-height:1.6;max-width:600px}
+.page-desc em{color:var(--red);font-style:italic;font-weight:700}
 
-/* STEP CONTROLS */
-.step-strip{padding:14px 24px;background:var(--paper);border-bottom:1px solid var(--rule);
-  display:flex;align-items:center;gap:12px;flex-wrap:wrap}
-.step-lbl{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--ink);opacity:.4;flex-shrink:0}
-.step-badge{font-family:var(--display);font-size:38px;letter-spacing:.02em;color:var(--ink);
-  line-height:1;min-width:36px}
-.s-btn{padding:8px 18px;border:1.5px solid var(--rule);background:transparent;
-  font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.05em;
-  text-transform:uppercase;color:var(--ink);opacity:.6;cursor:pointer;transition:all .12s;
-  -webkit-tap-highlight-color:transparent}
-.s-btn:hover{opacity:1;border-color:var(--ink)}
-.s-btn:disabled{opacity:.25;cursor:not-allowed}
-.s-btn.primary{background:var(--ink);color:#f4f2ec;border-color:var(--ink);opacity:1}
+/* BODY LAYOUTS */
+.two-col{display:grid;grid-template-columns:1fr 280px;border-top:1px dashed #d0d0d8}
+.two-col-wide{display:grid;grid-template-columns:1fr 320px;border-top:1px dashed #d0d0d8}
+.one-col{border-top:1px dashed #d0d0d8}
+.left-col{padding:24px 28px;border-right:1px dashed #d0d0d8;display:flex;flex-direction:column;gap:20px}
+.right-col{padding:20px 18px;display:flex;flex-direction:column;gap:14px}
+.full-col{padding:24px 28px;display:flex;flex-direction:column;gap:20px}
 
-/* CANVAS */
-.canvas-section{background:var(--sand);border-bottom:1px solid var(--rule);
-  display:flex;justify-content:center;padding:16px}
-canvas#frac-cvs{display:block;border:1.5px solid var(--rule)}
+/* SECTION LABELS */
+.sec{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.sec-dot{width:13px;height:13px;border-radius:50%;flex-shrink:0}
+.sec-title{font-size:14px;font-weight:800;color:var(--ink)}
+.sec-rule{flex:1;border:none;border-top:1px dashed #d8d8e0}
 
-/* STATS */
-.stats-section{padding:16px 24px;border-bottom:1px solid var(--rule)}
-.stats-head{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--ink);opacity:.4;margin-bottom:10px}
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px}
-.stat-box{padding:12px 14px;background:var(--paper);border:1.5px solid var(--rule)}
-.sb-lbl{font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--ink);opacity:.4;margin-bottom:4px}
-.sb-val{font-family:var(--display);font-size:clamp(20px,3.5vw,30px);letter-spacing:.02em;line-height:1}
-.sb-val.blue{color:var(--blue)}
-.sb-val.red{color:var(--red)}
-.sb-val.green{color:var(--green)}
+/* INFO CARDS (right col) */
+.info-card{background:#fff;border:2px solid var(--border);border-radius:18px;padding:14px 16px}
+.info-card + .info-card{margin-top:0}
 
-/* FORMULA STRIP */
-.formula-strip{padding:16px 24px;background:var(--ink);border-bottom:1px solid var(--rule);
-  font-family:var(--mono);font-size:12px;color:#f0ece3;line-height:1.9}
-.fs-hl{color:#e8a840;font-weight:600}
-.fs-green{color:#6ec891}
-.fs-blue{color:#6ba3d6}
+/* CONTROLS — sliders */
+.ctrl-block{display:flex;flex-direction:column;gap:5px}
+.ctrl-head{display:flex;justify-content:space-between;align-items:baseline}
+.ctrl-lbl{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3)}
+.ctrl-val{font-family:var(--mono);font-size:24px;font-weight:700}
+input[type=range]{-webkit-appearance:none;width:100%;height:5px;border-radius:3px;background:#e8e8e8;outline:none;cursor:pointer}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;cursor:pointer;border:2px solid var(--border)}
 
-/* INSIGHT */
-.insight-row{padding:16px 24px;display:grid;grid-template-columns:3px 1fr;gap:14px}
-.ins-bar{background:var(--amber)}
-.ins-text{font-size:13.5px;line-height:1.75;color:var(--ink);opacity:.7}
-.ins-text strong{opacity:1}
+/* TABS / SCENARIO BUTTONS */
+.tab-row{display:flex;gap:8px;flex-wrap:wrap;padding:16px 28px;border-bottom:1px dashed #d0d0d8;background:#fafafa}
+.tab-btn{padding:8px 18px;border:2px solid #d0d0d8;border-radius:30px;background:#fff;font-family:var(--sans);font-size:13px;font-weight:700;color:var(--ink2);cursor:pointer;transition:all .14s}
+.tab-btn:hover{border-color:var(--teal);color:var(--teal)}
+.tab-btn.active{background:var(--teal);color:#fff;border-color:var(--teal)}
+.tab-btn.active-orange{background:var(--orange);color:#fff;border-color:var(--orange)}
+
+/* STEP NAV */
+.step-nav{display:flex;align-items:center;gap:12px;padding:14px 28px;border-bottom:1px dashed #d0d0d8;background:#fafafa}
+.step-btn{padding:8px 20px;border:2px solid var(--border);border-radius:30px;font-family:var(--sans);font-size:13px;font-weight:800;cursor:pointer;background:#fff;color:var(--ink2);transition:all .14s}
+.step-btn:hover:not(:disabled){background:#f5f5f5}
+.step-btn:disabled{opacity:.35;cursor:default}
+.step-btn.primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+.step-btn.primary:hover{background:#3ab5ac}
+.step-dots{display:flex;gap:6px}
+.sdot{width:9px;height:9px;border-radius:50%;background:#d8d8e0;transition:all .15s}
+.sdot.done{background:var(--teal)}
+.sdot.cur{background:var(--teal);transform:scale(1.3)}
+.step-lbl{flex:1;font-size:14px;font-weight:700;color:var(--ink)}
+
+/* STEP BANNER */
+.step-banner{padding:14px 28px;background:#fffbe6;border-bottom:1px dashed #d0d0d8;display:flex;align-items:baseline;gap:10px}
+.step-num{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--orange);flex-shrink:0}
+.step-text{font-size:15px;font-weight:700;color:var(--ink);line-height:1.4}
+
+/* CANVAS AREA */
+.canvas-wrap{background:#f4f8ff;border-radius:0;overflow:hidden;position:relative}
+canvas{display:block;width:100%;height:auto}
+
+/* FACT / STATS ROWS */
+.fact-row{display:flex;justify-content:space-between;align-items:baseline;padding:7px 0;border-bottom:1px dashed #e8e8e8}
+.fact-row:last-child{border-bottom:none}
+.fact-lbl{font-size:13px;color:var(--ink2)}
+.fact-val{font-family:var(--mono);font-size:16px;font-weight:700}
+
+/* TALLY BUTTONS */
+.tally{display:flex;align-items:center;gap:8px}
+.tally-btn{width:36px;height:36px;border:2px solid var(--border);border-radius:10px;background:#fff;font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .12s;color:var(--ink2)}
+.tally-btn:hover{background:var(--teal);color:#fff;border-color:var(--teal)}
+.tally-num{font-family:var(--mono);font-size:28px;font-weight:700;min-width:40px;text-align:center}
+
+/* VERDICT STRIP */
+.verdict-strip{padding:14px 28px;font-size:15px;font-weight:700;border-top:1px dashed #d0d0d8}
+.verdict-ok{background:#e8faf9;color:var(--green)}
+.verdict-fail{background:#fef0ee;color:#c0441e}
+
+/* INSIGHT STRIP */
+.insight-strip{padding:16px 28px;font-size:14px;color:var(--ink2);line-height:1.7;background:#fffbe6;border-top:1px dashed #d0d0d8}
+.insight-strip strong{color:var(--ink);font-weight:700}
+
+/* NUMBER CIRCLES */
+.num-circle{width:26px;height:26px;border-radius:50%;background:var(--yellow);border:2px solid var(--border);display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;flex-shrink:0}
+
+/* FLOATING SHAPES */
+.shape{position:fixed;pointer-events:none;z-index:-1}
+.sh-circle{width:56px;height:56px;border-radius:50%;background:#ff6b6b;opacity:.65;top:80px;left:calc(50% - 530px)}
+.sh-tri{width:0;height:0;border-left:22px solid transparent;border-right:22px solid transparent;border-bottom:38px solid #4ecdc4;opacity:.65;bottom:180px;right:calc(50% - 530px)}
+.sh-star{font-size:34px;line-height:1;opacity:.55;top:200px;right:calc(50% - 510px)}
+.sh-sq{width:36px;height:36px;border-radius:8px;background:#a78bfa;opacity:.55;bottom:90px;left:calc(50% - 510px);transform:rotate(15deg)}
+
+@media(max-width:740px){
+  body{padding:12px}
+  .two-col,.two-col-wide{grid-template-columns:1fr}
+  .left-col{border-right:none;border-bottom:1px dashed #d0d0d8}
+  .card-header,.full-col,.left-col,.right-col{padding-left:18px;padding-right:18px}
+  .tab-row,.step-nav,.step-banner,.verdict-strip,.insight-strip{padding-left:18px;padding-right:18px}
+}
+.page-card{max-width:960px}
 </style>
 </head>
 <body>
+<div class="shape sh-circle"></div>
+<div class="shape sh-tri"></div>
+<div class="shape sh-star">★</div>
+<div class="shape sh-sq"></div>
+<div class="page-card">
+  <div class="card-header">
+    <div class="activity-pill">Ch 11 · 3D Shapes & Nets</div>
+    <div class="page-title">Fractal <span class="t-pill" style="background:var(--orange)">Builder</span></div>
+    <p class="page-desc">Step through fractal construction. Each iteration applies the same rule — creating <em>infinite detail from a simple pattern</em>.</p>
+  </div>
 
-<div class="masthead">
-  <div class="m-tag">Ch. 11 · 3D Shapes &amp; Nets</div>
-  <div class="m-title">Fractal Builder</div>
-  <div class="m-right">Grade 8 · Oxford / Bhanzu</div>
+  <!-- FRACTAL SELECTOR -->
+  <div class="tab-row">
+    <button class="fractal-btn tab-btn active" data-f="0">Sierpiński Carpet</button>
+    <button class="fractal-btn tab-btn" data-f="1">Sierpiński Gasket</button>
+    <button class="fractal-btn tab-btn" data-f="2">Koch Snowflake</button>
+  </div>
+
+  <!-- STEP NAV -->
+  <div class="step-nav">
+    <button class="step-btn" id="btn-prev" disabled>← Prev</button>
+    <span id="step-badge" style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--orange);min-width:60px;text-align:center">Step 0</span>
+    <button class="step-btn primary" id="btn-next">Next →</button>
+    <button class="step-btn" id="btn-reset" style="margin-left:auto">Reset</button>
+  </div>
+
+  <div class="two-col">
+    <div class="left-col" style="padding:0">
+      <canvas id="frac-cvs" style="display:block;width:100%;background:#f8f8f8"></canvas>
+    </div>
+    <div class="right-col">
+      <div class="sec"><div class="sec-dot" style="background:var(--teal)"></div><span class="sec-title">At this step</span><hr class="sec-rule"></div>
+      <div id="stats-grid" style="display:flex;flex-direction:column;gap:6px"></div>
+      <div id="formula-strip" style="margin-top:10px;font-family:var(--mono);font-size:13px;color:var(--ink2);line-height:1.9;padding:12px;background:#f8f8f8;border-radius:10px;border:1.5px solid #e0e0e0"></div>
+      <div class="info-card" style="margin-top:10px;padding:12px 14px">
+        <p style="font-size:13px;color:var(--ink2);line-height:1.6">
+          Fractals are shapes that look the same at every scale — <strong>self-similar</strong>. Each step applies the same rule to every existing piece, creating infinite complexity from a simple pattern.
+        </p>
+      </div>
+    </div>
+  </div>
+  <div class="insight-strip" id="insight-row"></div>
+
 </div>
-
-<div class="fractal-bar">
-  <button class="fractal-btn active" data-f="0">Sierpiński Carpet</button>
-  <button class="fractal-btn" data-f="1">Sierpiński Gasket</button>
-  <button class="fractal-btn" data-f="2">Koch Snowflake</button>
-</div>
-
-<div class="step-strip">
-  <span class="step-lbl">Step</span>
-  <span class="step-badge" id="step-badge">0</span>
-  <button class="s-btn" id="btn-prev" disabled>← Previous</button>
-  <button class="s-btn primary" id="btn-next">Next step →</button>
-  <button class="s-btn" id="btn-reset">Reset</button>
-</div>
-
-<div class="canvas-section">
-  <canvas id="frac-cvs"></canvas>
-</div>
-
-<div class="stats-section">
-  <div class="stats-head">Pattern statistics</div>
-  <div class="stats-grid" id="stats-grid"></div>
-</div>
-
-<div class="formula-strip" id="formula-strip"></div>
-
-<div class="insight-row" id="insight-row"></div>
-
 <script>
+
 let mode=0,step=0;
 const MAX=[4,5,5];
 const cvs=document.getElementById('frac-cvs');
@@ -289,6 +340,7 @@ document.querySelectorAll('.fractal-btn').forEach(b=>b.addEventListener('click',
 
 window.addEventListener('resize',draw);
 draw();
+
 </script>
 </body>
 </html>
